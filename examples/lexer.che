@@ -1,0 +1,171 @@
+
+
+module use namespace lx;
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include "lexer.h"
+#include <stdio.h>
+#include <string.h>
+
+
+
+#ifndef LEXER_H
+#define LEXER_H
+
+
+#define MAX_TOKENS 256
+#define MAX_ID_SIZE 32
+#define MAX_STRING_SIZE 64
+
+
+typedef struct
+{
+	enum
+	{
+		TK_ID,
+		TK_STRING,
+		TK_ASSIGN,
+		TK_SCLN,
+		TK_OP,
+		TK_CP,
+		TK_OB,
+		TK_CB,
+		TK_COMMA,
+		TK_PLUS,
+		TK_MINUS,
+		TK_STAR,
+		TK_DIV,
+		TK_NOT,
+		TK_AMPERCENT,
+		TK_AT,
+
+		TK_CHAR,
+		TK_LESSTHAN,
+		TK_MORETHAN,
+		TK_NOTEQ,
+		TK_ARROW
+	} type;
+	char const *content;
+}
+Token;
+
+
+typedef struct
+{
+	char const *content;
+	unsigned int i;
+	char c;
+}
+Lexer;
+
+
+void lexer_init(Lexer *l, char const *content);
+void lexer_advance(Lexer *l);
+Token* lexer_collect_tokens(Lexer *l, unsigned int *size);
+
+
+#endif
+
+
+void lexer_init(Lexer *l, char const *content)
+{
+	l->content = content;
+	l->i = 0;
+	l->c = l->content[0];
+}
+
+
+void lexer_advance(Lexer *l)
+{
+    l->c = l->content[++l->i];
+}
+
+
+Token* lexer_collect_tokens(Lexer *l, unsigned int *size)
+{
+	unsigned int i = 0;
+	Token *tokens = malloc(sizeof(Token) * MAX_TOKENS);
+
+
+	while (l->c != '\0')
+	{
+		if (l->c == ' ' || l->c == '\n' || l->c == '\t') 
+		{
+			lexer_advance(l);
+			continue;
+		}
+
+		if (isalnum(l->c))
+		{
+			char *id = malloc(MAX_ID_SIZE * sizeof(char));
+			unsigned char id_size = 0;
+			while (isalnum(l->c))
+			{
+				id[id_size] = l->c;
+				++id_size;
+				lexer_advance(l);
+			}
+			id[id_size] = '\0';
+			tokens[i++] = (Token){TK_ID, id};
+			continue;
+		}
+
+
+		if (l->c == '"')
+		{
+			char *string = malloc(MAX_STRING_SIZE * sizeof(char));
+			unsigned char string_size = 0;
+			while (l->c != '"')
+			{
+				string[string_size] = l->c;
+				++string_size;
+				lexer_advance(l);
+			}
+			string[string_size] = '\0';
+			tokens[i++] = (Token){TK_STRING, string};
+			continue;
+		}
+
+		switch (l->c)
+		{
+			case ' ':  break;
+			case '\n': break;
+			case '=': tokens[i++] = (Token){TK_ASSIGN, "="}; break;
+			case ';': tokens[i++] = (Token){TK_SCLN, ";"}; break;
+			case '(': tokens[i++] = (Token){TK_OP, "("}; break;
+			case ')': tokens[i++] = (Token){TK_CP, ")"}; break;
+			case '{': tokens[i++] = (Token){TK_OB, "{"}; break;
+			case '}': tokens[i++] = (Token){TK_CB, "}"}; break;
+			case ',': tokens[i++] = (Token){TK_COMMA, ","}; break;
+			case '+': tokens[i++] = (Token){TK_PLUS, "+"}; break;
+			case '-': tokens[i++] = (Token){TK_MINUS, "-"}; break;
+			case '*': tokens[i++] = (Token){TK_STAR, "*"}; break;
+			case '/': tokens[i++] = (Token){TK_DIV, "/"}; break;
+			case '!': tokens[i++] = (Token){TK_NOT, "!"}; break;
+			case '&': tokens[i++] = (Token){TK_AMPERCENT, "&"}; break;
+			case '@': tokens[i++] = (Token){TK_AT, "@"}; break;
+			default:
+				printf("Unknown symbol: %c\n", l->c);
+				assert(0);
+		}
+		lexer_advance(l); 
+	}
+	*size = i;
+	return tokens;
+}
+
+
+
+int main(int argc, char **argv)
+{
+	Lexer l;
+	lexer_init(&l, "int add(int x, int y)\n{ return x + y; }\n");
+	unsigned int size;
+	Token *t = lexer_collect_tokens(&l, &size);
+	for (unsigned int i=0; i < size; ++i)
+	{
+		printf("%s\n", t[i].content);
+	}
+}

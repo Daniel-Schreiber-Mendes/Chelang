@@ -1,0 +1,72 @@
+
+With left recursion:
+
+//expression
+E ->  id 
+	| il 
+	| sl 
+	| ( E ) 
+	| E [ E ] 
+	| E ( A )
+	| E O E
+	| U E
+
+//Argument list
+A ->  ? 
+	| B
+
+B ->  E 
+	| B , B
+
+//binary operators
+O -> = 
+	| + 
+	| -
+
+//unary operators
+U -> & 
+	| @ 
+	| -> 
+
+written understandable for website:
+E: lit
+E: ( E ) 
+E: E [ E ] 
+E: E ( A )
+E: E O E
+E: U E
+
+O: bin
+
+
+A:
+A: B
+B: E 
+B: B , B
+
+U: un
+
+Without left recursion (https://lab.brainonfire.net/CFG/remove-left-recursion.html):
+
+E: lit C
+└: ( E ) C
+└: U E C
+
+C: [ E ] C
+└: ( A ) C
+└: O E C
+└:
+
+O: bin
+
+A:
+└: B
+
+B: lit C D
+└: ( E ) C D
+└: U E C D
+
+D: , B D
+└:
+
+U:un
