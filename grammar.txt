@@ -1,4 +1,6 @@
 
+###############Expression
+
 With left recursion:
 
 //expression
@@ -29,6 +31,7 @@ U -> &
 	| -> 
 
 written understandable for website:
+
 E: lit
 E: ( E ) 
 E: E [ E ] 
@@ -70,3 +73,22 @@ D: , B D
 └:
 
 U:un
+
+###############Statement
+
+A: { B }
+
+A: if ( EXP ) { A }
+A: while ( EXP ) { A }
+A: return A ;
+
+A: T id C ;
+A: ;
+A: EXP ;
+
+C: = EXP
+C: 
+
+B: A
+B: A A
+B: 

@@ -5,8 +5,8 @@ c_obj_files := $(c_src_files:.c=.o)
 
 
 make: $(c_obj_files)
-	gcc -o ccc $^
+	gcc -o ccc $(^F)
 	./ccc
 
 %.o : %.c
-	gcc -c -g '$^' -Wall -Wextra -Wno-unused-parameter -Wno-unused-function
+	gcc -c -g '$^' -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -lcheio -Iinclude

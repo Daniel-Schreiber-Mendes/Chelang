@@ -1,0 +1,14 @@
+
+
+Int@ arr = 5 * (5 + 4);
+
+V foofunc(Int x, Int x)
+{
+	V funcdef()
+	{
+
+	}
+
+	Int var = x[10 + v()];
+	foofunc(&var, @d);
+}

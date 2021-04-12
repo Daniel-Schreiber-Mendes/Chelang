@@ -1,13 +1,17 @@
 #include "lexer.h"
-#include "ast.h"
+#include "parser.h"
+#include "file_reader.h"
 
 
 int main(int argc, char **argv)
 {
-	TokenArray t = lexer_collect_tokens("fnc Int main(){Int x = arr(1, 1, 1, 1)[i[i[i[i[i(1, 1)]]]]];}");
-	for (unsigned int i=0; i < t.size; ++i)
-	{
-		//printf("%s, %u, %li\n", t.tokens[i].content, t.tokens[i].type, t.tokens[i].value);
-	}
-	create_ast(&t);
+	FileArray fa;
+	file_array_create(&fa);
+
+	read_file(&fa, "test.che");
+	
+	Token *t = lexer_collect_tokens(fa.buffer[0]);
+	Ast ast = parse_tokens(t);
+
+	file_array_destroy(&fa);
 }
