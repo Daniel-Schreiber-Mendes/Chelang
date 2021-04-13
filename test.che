@@ -1,6 +1,13 @@
 
 
 Int@ arr = 5 * (5 + 4);
+FuncPtr ptr;
+
+struct Symbol
+{
+	C@ name,
+	C@ type
+}
 
 V foofunc(Int x, Int x)
 {
@@ -12,3 +19,4 @@ V foofunc(Int x, Int x)
 	Int var = x[10 + v()];
 	foofunc(&var, @d);
 }
+

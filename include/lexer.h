@@ -58,6 +58,9 @@ typedef enum
 	TK_FOR,
 	TK_RET,
 
+// 
+	TK_STRUCT,
+
 //construct type indicators
 	TK_TYPE
 	

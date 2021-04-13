@@ -3,7 +3,6 @@
 
 void statement(Ast *ast)
 {
-    AST_CALL();
     if (accept(TK_OB)) //compound statement
     {	
         if (accept(TK_CB)) return; //if statement is empty
@@ -15,7 +14,7 @@ void statement(Ast *ast)
         }
         expect(TK_CB);
     } 
-    else if(accept_var_or_fnc_def(ast))
+    else if(accept_var_fnc_type_def(ast))
     {
 
     }
@@ -57,17 +56,97 @@ void statement(Ast *ast)
         expression(ast);
         expect(TK_SCLN);
     }
-    AST_CALL_END();
 }
 
 
-bool accept_var_or_fnc_def(Ast *ast)
+bool accept_var_fnc_type_def(Ast *ast)
 {
-    if(accept(TK_TYPE))
+    if (accept(TK_STRUCT))
+    {
+        ast = ast_add_child(ast, C_STRUCT_DEF, "C_STRUCT_DEF");
+        expect(TK_TYPE);
+        ast_add_token(ast, get_token(-1));
+        expect(TK_OB);
+        while (accept(TK_TYPE))
+        {
+            expect(TK_ID);
+            ast_add_token(ast, get_token(-2));
+            ast_add_token(ast, get_token(-1));
+            if (!check(TK_CB))
+            {
+                expect(TK_COMMA);
+            }
+        }
+        expect(TK_CB);
+    }
+    else if(accept(TK_TYPE))
     {
         expect(TK_ID);
         if (accept(TK_ASSIGN)) //var definition with initialization
         {
+            ast = ast_add_child(ast, C_VAR_DEF_INIT, "C_VAR_DEF_INIT");
+            ast_add_token(ast, get_token(-3));
+            ast_add_token(ast, get_token(-2));
+            expression(ast);
+            expect(TK_SCLN);
+        }
+        else if (accept(TK_OP)) //function definition
+        {
+            ast = ast_add_child(ast, C_FUNC_DEF, "C_FUNC_DEF");
+            ast_add_token(ast, get_token(-3));
+            ast_add_token(ast, get_token(-2));
+            while (accept(TK_TYPE))
+            {
+                expect(TK_ID);
+                ast_add_token(ast, get_token(-2));
+                ast_add_token(ast, get_token(-1));
+                if (!check(TK_CP))
+                {
+                    expect(TK_COMMA);
+                }
+            }
+            expect(TK_CP);
+            statement(ast);
+        }
+        else 
+        {
+            ast = ast_add_child(ast, C_VAR_DEF, "C_VAR_DEF");
+            ast_add_token(ast, get_token(-2));
+            ast_add_token(ast, get_token(-1));                
+            expect(TK_SCLN); //var definition
+        }
+        return 1;
+    }
+    return 0;
+}
+
+void var_fnc_type_def(Ast *ast)
+{
+    if (accept(TK_STRUCT))
+    {
+        ast = ast_add_child(ast, C_STRUCT_DEF, "C_STRUCT_DEF");
+        expect(TK_TYPE);
+        ast_add_token(ast, get_token(-1));
+        expect(TK_OB);
+        while (accept(TK_TYPE))
+        {
+            expect(TK_ID);
+            ast_add_token(ast, get_token(-2));
+            ast_add_token(ast, get_token(-1));
+            if (!check(TK_CB))
+            {
+                expect(TK_COMMA);
+            }
+        }
+        expect(TK_CB);
+    }
+    else
+    {
+        expect(TK_TYPE);
+        expect(TK_ID);
+        if (accept(TK_ASSIGN)) //var definition with initialization
+        {
+            ast = ast_add_child(ast, C_VAR_DEF_INIT, "C_VAR_DEF_INIT");
             ast_add_token(ast, get_token(-3));
             ast_add_token(ast, get_token(-2));
             expression(ast);
@@ -98,47 +177,5 @@ bool accept_var_or_fnc_def(Ast *ast)
             ast_add_token(ast, get_token(-1));
             expect(TK_SCLN); //var definition
         }
-        return 1;
-    }
-    return 0;
-}
-
-void var_or_fnc_def(Ast *ast)
-{
-    expect(TK_TYPE);
-    expect(TK_ID);
-    if (accept(TK_ASSIGN)) //var definition with initialization
-    {
-        ast = ast_add_child(ast, C_VAR_DEF_INIT, "C_VAR_DEF_INIT");
-        ast_add_token(ast, get_token(-3));
-        ast_add_token(ast, get_token(-2));
-        expression(ast);
-        expect(TK_SCLN);
-    }
-    else if (accept(TK_OP)) //function definition
-    {
-        ast = ast_add_child(ast, C_FUNC_DEF, "C_FUNC_DEF");
-        ast_add_token(ast, get_token(-3));
-        ast_add_token(ast, get_token(-2));
-        while (accept(TK_TYPE))
-        {
-            expect(TK_ID);
-            ast_add_token(ast, get_token(-2));
-            ast_add_token(ast, get_token(-1));
-            if (!check(TK_CP))
-            {
-                expect(TK_COMMA);
-            }
-        }
-        expect(TK_CP);
-        statement(ast);
-    }
-    else 
-    {
-        printf("%s\n", token.content);
-        ast = ast_add_child(ast, C_VAR_DEF, "C_VAR_DEF");
-        ast_add_token(ast, get_token(-3));
-        ast_add_token(ast, get_token(-2));
-        expect(TK_SCLN); //var definition
     }
 }

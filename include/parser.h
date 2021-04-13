@@ -1,37 +1,11 @@
 #ifndef PARSER_H
 #define PARSER_H
-#include "lexer.h"
+#include <lexer.h>
+#include <checl/containers.h>
 
-#define FOLLOW_AST_CALLS
-
-//for debugging
-extern unsigned char indentation;
-#ifdef FOLLOW_AST_CALLS
-#define AST_CALL()\
-	for (unsigned char i=0; i < indentation; ++i)\
-		printf("|");\
-	++indentation;\
-	printf("\033[0;34m");\
-	printf("%s: %s\n", __PRETTY_FUNCTION__, token.content);\
-	printf("\033[0m");
-
-#define AST_CALL_END()\
-	--indentation;\
-	for (unsigned char i=0; i < indentation; ++i)\
-		printf("|");\
-	printf("\033[0;32m");\
-	printf("%s: %s\n", __PRETTY_FUNCTION__, token.content);\
-	printf("\033[0m");
-#endif
-#ifndef FOLLOW_AST_CALLS
-#define AST_CALL()
-#define AST_CALL_END()
-#endif
 
 typedef enum
 {
-	C_STATEMENT,
-	C_EXPR,
 	C_UNIT,
 	C_VAR_DEF,
 	C_VAR_DEF_INIT,
@@ -43,7 +17,8 @@ typedef enum
 	C_RET,
 	C_ARR_INDX,
 	C_BIN_OP,
-	C_GROUP
+	C_GROUP,
+	C_STRUCT_DEF
 }
 ConstructType;
 
@@ -54,6 +29,24 @@ typedef enum
 	AT_TOKEN
 }
 AstType;
+
+
+typedef struct
+{
+	unsigned int size;
+	char *name;
+	char *type;
+}
+Symbol;
+
+
+typedef struct
+{
+	Symbol symbols[32];
+	//Vector symbols; //vector of Symbol structs
+	unsigned short size;
+}
+SymbolTable;
 
 
 struct Ast
@@ -67,7 +60,9 @@ struct Ast
 	char const *name;
 	struct Ast *parent;
 	struct Ast *childs[16];
+	Vector children; //vector of Ast pointers
 	U8 child_count;
+	SymbolTable symbol_table;
 };
 
 typedef struct Ast Ast;
@@ -86,22 +81,21 @@ bool accept_unary(void);
 bool accept_binary(void);
 
 void statement(Ast *ast);
-bool accept_var_or_fnc_def(Ast *ast);
-void var_or_fnc_def(Ast *ast);
+bool accept_var_fnc_type_def(Ast *ast);
+void var_fnc_type_def(Ast *ast);
 
-void ast_add_token(Ast *parent, Token t);
 void ast_create(Ast *ast);
 Ast* ast_add_child(Ast *parent, ConstructType t, char const* name);
-Ast* ast_get_parent(Ast* ast);
+void ast_add_token(Ast *parent, Token t);
 void ast_print(Ast *ast, U8 padding, char const* head);
 
-void forward(void);
 bool accept(TokenType t);
 bool expect(TokenType t); 
 bool check(TokenType t);
 Token get_token(I8 d);
-bool check_ahead(TokenType t, U8 d);
 void unit(Ast *ast);
 Ast parse_tokens(Token *token_array);
+
+void create_symbol_tables(Ast *ast, Ast *last_scope);
 
 #endif

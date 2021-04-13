@@ -128,6 +128,10 @@ Token* lexer_collect_tokens(char const *content)
 			{
 				tokens[tk_i].type = TK_RET;
 			}
+			else if (!strcmp(tokens[tk_i].content, "struct"))
+			{
+				tokens[tk_i].type = TK_STRUCT;
+			}
 		}
 	}
 

@@ -46,7 +46,6 @@ E: lit C
 */
 void expression(Ast *ast)
 {
-	AST_CALL();
 	if (accept_literal())
 	{
 		if (strcmp(token.content, "(")) //if not function call, because then the token comes after the C_FUNC_CALL token
@@ -73,7 +72,6 @@ void expression(Ast *ast)
 	{
 		printf("Error no expression found: %s\n", token.content);
 	}
-	AST_CALL_END();
 }
 
 /*
@@ -84,7 +82,6 @@ C: [ E ] C
 */
 void expression1(Ast *ast)
 {
-	AST_CALL();
 	if (accept(TK_OSB))
 	{
 		ast = ast_add_child(ast, C_ARR_INDX, "C_ARR_INDX");
@@ -107,7 +104,6 @@ void expression1(Ast *ast)
 		expression(ast);//
 		expression1(ast);
 	}
-	AST_CALL_END()
 }
 
 /*
@@ -126,7 +122,6 @@ B: lit C D
 */
 void expression3(Ast *ast)
 {
-	AST_CALL();
 	if (accept_literal())
 	{
 		ast_add_token(ast, get_token(-1));
@@ -153,7 +148,6 @@ void expression3(Ast *ast)
 	{
 		printf("Error no expression3 found, %s\n", token.content);	
 	}
-	AST_CALL_END()
 }
 
 
@@ -164,7 +158,6 @@ B: lit C D
 */
 bool accept_expression3(Ast *ast)
 {
-	AST_CALL();
 	if (accept_literal())
 	{
 		expression1(ast);
@@ -186,10 +179,8 @@ bool accept_expression3(Ast *ast)
 	}
 	else
 	{
-		AST_CALL_END()
 		return 0;
 	}
-	AST_CALL_END()
 	return 1;
 }
 
@@ -199,11 +190,9 @@ D: , B D
 */
 void expression4(Ast *ast)
 {
-	AST_CALL();
 	if (accept(TK_COMMA))
 	{
 		expression3(ast);
 		expression4(ast);
 	}
-	AST_CALL_END()
 }
