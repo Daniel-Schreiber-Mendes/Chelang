@@ -13,7 +13,7 @@ void create_symbol_tables(Ast *ast, Ast *last_scope)
 	{
 		if (ast->ctype == C_VAR_DEF || ast->ctype == C_VAR_DEF_INIT)
 		{
-			last_scope->symbol_table.symbols[last_scope->symbol_table.size++] = (Symbol){0, ast->childs[1]->name, ast->childs[0]->name};
+			vector_push_back(&last_scope->symbols, Symbol, ((Symbol){0, ast->childs[1]->name, ast->childs[0]->name}));
 		}
 		else if (ast->ctype == C_FUNC_DEF)
 		{
@@ -21,13 +21,13 @@ void create_symbol_tables(Ast *ast, Ast *last_scope)
 			{
 				if (i % 2 == 1) //every second token is an identifier
 				{
-					last_scope->symbol_table.symbols[last_scope->symbol_table.size++] = (Symbol){0, ast->childs[i]->name, ast->childs[i - 1]->name};
+					vector_push_back(&last_scope->symbols, Symbol, ((Symbol){0, ast->childs[i]->name, ast->childs[i - 1]->name}));
 				}
 			}
 		}
 		else if (ast->ctype == C_STRUCT_DEF)
 		{
-			last_scope->symbol_table.symbols[last_scope->symbol_table.size++] = (Symbol){0, ast->childs[0]->name, "Struct"};
+			vector_push_back(&last_scope->symbols, Symbol, ((Symbol){0, ast->childs[0]->name, "Struct"}));
 		}
 	}
 

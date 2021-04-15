@@ -9,7 +9,7 @@ void ast_create(Ast *ast)
 	ast->child_count = 0;
 	ast->type = AT_CONSTRUCT;
 	ast->ctype = C_UNIT;
-	ast->symbol_table.size = 0;
+	vector_construct(&ast->symbols, sizeof(Symbol));
 }
 
 
@@ -35,8 +35,19 @@ Ast* ast_add_child(Ast *parent, ConstructType t, char const* name)
 	child->type = AT_CONSTRUCT;
 	child->ctype = t;
 
+	if (child->ctype == C_UNIT || child->ctype == C_SCOPE || child->ctype == C_FUNC_DEF)
+	{
+		vector_construct(&child->symbols, sizeof(Symbol));
+	}
+
 	parent->childs[parent->child_count++] = child;
 	return child;
+}
+
+
+Ast* ast_get_penultimate(Ast* ast)
+{
+	return ast->parent->childs[ast->parent->child_count - 2];
 }
 
 
@@ -52,9 +63,9 @@ void ast_print(Ast *ast, U8 padding, char const* head)
 	if (ast->type == AT_CONSTRUCT && (ast->ctype == C_UNIT || ast->ctype == C_SCOPE || ast->ctype == C_FUNC_DEF))
 	{
 		printf(": ");
-		for (unsigned char i=0; i < ast->symbol_table.size; ++i)
+		vector_vforeach(&ast->symbols, Symbol, symbol)
 		{
-			printf("(%s:%s) ", ast->symbol_table.symbols[i].type, ast->symbol_table.symbols[i].name);
+			printf("(%s:%s) ", symbol.type, symbol.name);
 		}
 	}
 

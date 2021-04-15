@@ -40,15 +40,6 @@ typedef struct
 Symbol;
 
 
-typedef struct
-{
-	Symbol symbols[32];
-	//Vector symbols; //vector of Symbol structs
-	unsigned short size;
-}
-SymbolTable;
-
-
 struct Ast
 {
 	AstType type;
@@ -57,12 +48,11 @@ struct Ast
 		ConstructType ctype;
 		TokenType ttype;
 	};
-	char const *name;
+	char *name;
 	struct Ast *parent;
 	struct Ast *childs[16];
-	Vector children; //vector of Ast pointers
 	U8 child_count;
-	SymbolTable symbol_table;
+	Vector symbols; //symbol table
 };
 
 typedef struct Ast Ast;
@@ -87,6 +77,7 @@ void var_fnc_type_def(Ast *ast);
 void ast_create(Ast *ast);
 Ast* ast_add_child(Ast *parent, ConstructType t, char const* name);
 void ast_add_token(Ast *parent, Token t);
+Ast* ast_get_penultimate(Ast* ast);
 void ast_print(Ast *ast, U8 padding, char const* head);
 
 bool accept(TokenType t);

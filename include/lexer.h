@@ -17,6 +17,7 @@
 typedef enum
 {
 //other
+	TK_NULL,
 	TK_EOF,
 	
 	TK_ID,
