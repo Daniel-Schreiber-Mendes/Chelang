@@ -50,6 +50,51 @@ Ast* ast_get_penultimate(Ast* ast)
 	return ast->parent->childs[ast->parent->child_count - 2];
 }
 
+/* unsortet ast
+C_UNIT: 
+└──C_VAR_DEF_INIT
+|  ├──Int@
+|  ├──arr
+|  ├──5
+|  └──C_BIN_OP
+|  |  ├──*
+|  |  ├──1
+|  |  └──C_BIN_OP
+|  |  |  ├──+
+|  |  |  └──1
+sortet ast
+C_UNIT: 
+└──C_VAR_DEF_INIT
+|  ├──Int@
+|  ├──arr
+|  └──C_BIN_OP
+|  |  ├──5
+|  |  ├──*
+|  |  └──C_BIN_OP
+|  |  |  ├──1
+|  |  |  ├──+
+|  |  |  └──1
+
+*/
+void ast_sort(Ast *ast)
+{
+	for (U8 i=0; i < ast->child_count; ++i)
+	{
+		ast_sort(ast->childs[i]);
+	}
+
+	if (ast->type == AT_CONSTRUCT && ast->ctype == C_BIN_OP)
+	{
+		Ast *left_sibling = ast->parent->childs[ast->parent->child_count - 2];
+		left_sibling->parent = ast;
+		ast->parent->childs[--ast->parent->child_count - 1] = ast;
+		ast->childs[2] = ast->childs[1];
+		ast->childs[1] = ast->childs[0];
+		ast->childs[0] = left_sibling;
+		++ast->child_count;
+	}
+}
+
 
 void ast_print(Ast *ast, U8 padding, char const* head)
 {

@@ -78,6 +78,7 @@ void ast_create(Ast *ast);
 Ast* ast_add_child(Ast *parent, ConstructType t, char const* name);
 void ast_add_token(Ast *parent, Token t);
 Ast* ast_get_penultimate(Ast* ast);
+void ast_sort(Ast *ast);
 void ast_print(Ast *ast, U8 padding, char const* head);
 
 bool accept(TokenType t);

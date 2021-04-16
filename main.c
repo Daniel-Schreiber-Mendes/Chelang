@@ -11,9 +11,10 @@ int main(int argc, char **argv)
 	read_file(&fa, "test.che");
 	
 	Ast ast = parse_tokens(lexer_collect_tokens(fa.buffer[0]));
+	ast_sort(&ast);
 	create_symbol_tables(&ast, NULL);
-	create_iit(&ast);
 	ast_print(&ast, 0, "");
+	create_iit(&ast);
 
 	file_array_destroy(&fa);
 }
