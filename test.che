@@ -1,10 +1,14 @@
 
 
-Int@ arr = 5 * 1 + 1;
+Int@ arr = (5 * (1 + 1)) * (3 + 4);
 
 
-I v()
+V foo()
 {
-	Int x = 6;
-	y = x;
+	Int x = 5;
+	if (x > 5)
+	{
+		ret 5;
+	}
+	ret x;
 }

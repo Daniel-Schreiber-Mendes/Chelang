@@ -40,6 +40,26 @@ typedef struct
 Symbol;
 
 
+
+typedef struct
+{
+	union
+	{
+		int value;
+		unsigned int var_id;
+	};
+	char *type; //type of the operand, can be null if it is not known
+	enum //OperandType
+	{
+		OT_NO_OP,
+		OT_NUM,
+		OT_VAR	
+	} 
+	ot;
+}
+Operand;
+
+
 struct Ast
 {
 	AstType type;
@@ -53,6 +73,7 @@ struct Ast
 	struct Ast *childs[16];
 	U8 child_count;
 	Vector symbols; //symbol table
+	Operand o; //temporary
 };
 
 typedef struct Ast Ast;
@@ -78,8 +99,13 @@ void ast_create(Ast *ast);
 Ast* ast_add_child(Ast *parent, ConstructType t, char const* name);
 void ast_add_token(Ast *parent, Token t);
 Ast* ast_get_penultimate(Ast* ast);
-void ast_sort(Ast *ast);
+bool ast_sort(Ast *ast);
 void ast_print(Ast *ast, U8 padding, char const* head);
+Ast* ast_get_left_sibling(Ast *ast);
+unsigned int ast_get_index(Ast *ast);
+void ast_insert_child(Ast *parent, Ast *child, unsigned int i);
+void ast_move(Ast *dest, unsigned int dest_i, Ast *ast, unsigned int i);
+
 
 bool accept(TokenType t);
 bool expect(TokenType t); 

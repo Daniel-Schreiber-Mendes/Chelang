@@ -3,64 +3,75 @@
 #include<parser.h>
 
 
-typedef enum
+//o0 = o1
+typedef struct
 {
-	OT_NO_OP,
-	OT_NUM,
-	OT_VAR
+	Operand o0;
+	// =
+	Operand o1;
 }
-OperandType;
+I_assign1;
 
 
-typedef enum
+// o0 = o1 r_operator o2
+typedef struct
 {
-	IIT_ASSIGN_1,
-	IIT_ASSIGN_2,
-	IIT_FUNC_CALL
+	Operand o0;
+	// =
+	Operand o1;
+	char *r_operator;
+	Operand o2;
 }
-IIType;
+I_assign2;
 
 
 typedef struct
 {
-	char *type; //type of the operand, can be null if it is not known
-	union
-	{
-		int value;
-		int var_id;
-	};
-	OperandType ot;
+	Operand o0;
 }
-Operand;
+I_func_call;
 
 
 typedef struct
 { 
-	char *left_operator;
-	char *right_operator; //optional
-	Operand o0, o1, o2;
-	IIType type;
+	enum
+	{
+		I_ASSIGN1,
+		I_ASSIGN2,
+		I_FUNC_CALL
+	} type;
+	union
+	{
+		I_assign1 assign1;
+		I_assign2 assign2;
+		I_func_call func_call;
+	};
 }
-Iinstruction;
+Instruction;
 
 
 typedef struct
 {
-	Iinstruction instructions[64];
+	Instruction instructions[64];
 	unsigned int size;
 }
 Iit;
 
 
-#define NO_OPERAND ((Operand){0, {0}, 0})
+#define NO_OPERAND ((Operand){{0}, 0, 0})
 
 
 Iit create_iit(Ast *ast);
 void create_ii(Ast *ast);
 
-void create_iinstruction(char *left_operator, char *right_operator, Operand o0, Operand o1, Operand o2);
-Operand create_operand(Ast *ast, bool make_temporary);
+
+void create_i_assign1(Operand o0, Operand o1);
+void create_i_assign2(Operand o0, Operand o1, char *r_operator, Operand o2);
+void create_i_func_call(Operand o0);
+
+Operand create_operand(Ast *ast);
 unsigned int get_var_id(Ast *ast);
 Operand create_temporary(void);
+Operand get_last_operand(void);
 
 #endif

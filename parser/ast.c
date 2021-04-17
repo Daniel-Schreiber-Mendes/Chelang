@@ -51,48 +51,72 @@ Ast* ast_get_penultimate(Ast* ast)
 }
 
 /* unsortet ast
-C_UNIT: 
-└──C_VAR_DEF_INIT
-|  ├──Int@
-|  ├──arr
-|  ├──5
-|  └──C_BIN_OP
-|  |  ├──*
-|  |  ├──1
-|  |  └──C_BIN_OP
-|  |  |  ├──+
-|  |  |  └──1
+C_UNIT (1): 
+└──C_VAR_DEF_INIT (3)
+|  ├──Int@ (0)
+|  ├──arr (0)
+|  └──C_GROUP (3)
+|  |  ├──5 (0)
+|  |  ├──C_BIN_OP (2)
+|  |  |  ├──* (0)
+|  |  |  └──C_GROUP (2)
+|  |  |  |  ├──1 (0)
+|  |  |  |  └──C_BIN_OP (2)
+|  |  |  |  |  ├──+ (0)
+|  |  |  |  |  └──1 (0)
+|  |  └──C_BIN_OP (2)
+|  |  |  ├──* (0)
+|  |  |  └──C_GROUP (2)
+|  |  |  |  ├──3 (0)
+|  |  |  |  └──C_BIN_OP (2)
+|  |  |  |  |  ├──+ (0)
+|  |  |  |  |  └──4 (0)
 sortet ast
-C_UNIT: 
-└──C_VAR_DEF_INIT
-|  ├──Int@
-|  ├──arr
-|  └──C_BIN_OP
-|  |  ├──5
-|  |  ├──*
-|  |  └──C_BIN_OP
-|  |  |  ├──1
-|  |  |  ├──+
-|  |  |  └──1
+C_UNIT (1): 
+└──C_VAR_DEF_INIT (3)
+|  ├──Int@ (0)
+|  ├──arr (0)
+|  └──C_GROUP (1)
+|  |  └──C_BIN_OP (3)
+|  |  |  ├──C_BIN_OP (3)
+|  |  |  |  ├──5 (0)
+|  |  |  |  ├──* (0)
+|  |  |  |  └──C_GROUP (1)
+|  |  |  |  |  └──C_BIN_OP (3)
+|  |  |  |  |  |  ├──1 (0)
+|  |  |  |  |  |  ├──+ (0)
+|  |  |  |  |  |  └──1 (0)
+|  |  |  ├──* (0)
+|  |  |  └──C_GROUP (1)
+|  |  |  |  └──C_BIN_OP (3)
+|  |  |  |  |  ├──3 (0)
+|  |  |  |  |  ├──+ (0)
+|  |  |  |  |  └──4 (0)
+
 
 */
-void ast_sort(Ast *ast)
+bool ast_sort(Ast *ast)
 {
 	for (U8 i=0; i < ast->child_count; ++i)
 	{
-		ast_sort(ast->childs[i]);
+		if (ast_sort(ast->childs[i])) //if a child got removed
+		{
+			if (i < ast->child_count)
+				ast_sort(ast->childs[i]);
+		}
 	}
-
 	if (ast->type == AT_CONSTRUCT && ast->ctype == C_BIN_OP)
 	{
-		Ast *left_sibling = ast->parent->childs[ast->parent->child_count - 2];
-		left_sibling->parent = ast;
-		ast->parent->childs[--ast->parent->child_count - 1] = ast;
-		ast->childs[2] = ast->childs[1];
-		ast->childs[1] = ast->childs[0];
-		ast->childs[0] = left_sibling;
-		++ast->child_count;
+		Ast *left_sibling = ast_get_left_sibling(ast);
+		unsigned int i = ast_get_index(ast);
+		ast->parent->childs[i - 1] = ast;
+		ast->parent->childs[i] = ast->parent->childs[i + 1];
+		ast->parent->child_count--;
+//Problem: if parent child count is decreased but rightmost sibling has not been visitet it is ignored
+		ast_insert_child(ast, left_sibling, 0);
+		return true;
 	}
+	return false;
 }
 
 
@@ -119,4 +143,42 @@ void ast_print(Ast *ast, U8 padding, char const* head)
 	{
 		ast_print(ast->childs[i], padding+1, i + 1 >=  ast->child_count ? "└──" : "├──");
 	}	
+}
+
+
+
+Ast* ast_get_left_sibling(Ast *ast)
+{
+	for (unsigned int i=0; i < ast->parent->child_count; ++i)
+	{
+		if (ast->parent->childs[i] == ast)
+		{
+			return ast->parent->childs[i - 1];
+		}
+	}
+	assert(false);
+	return NULL;
+}
+
+
+unsigned int ast_get_index(Ast *ast)
+{
+	for (unsigned int i=0; i < ast->parent->child_count; ++i)
+	{
+		if (ast->parent->childs[i] == ast)
+		{
+			return i;
+		}
+	}
+	assert(false);
+	return 0;
+}
+
+
+void ast_insert_child(Ast *parent, Ast *child, unsigned int i)
+{
+	memmove(&parent->childs[parent->child_count - 1 - i], &parent->childs[i], (parent->child_count - i) * sizeof(Ast*));
+	parent->childs[i] = child;
+	child->parent = parent;
+	++parent->child_count;
 }

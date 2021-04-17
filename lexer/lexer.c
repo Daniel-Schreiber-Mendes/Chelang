@@ -9,11 +9,12 @@
 		lexer_advance();\
 	}\
 	str[size] = '\0';\
-	tokens[i++] = (Token){token, str};
+	newt(token, str);
 
 
 #define lexer_advance() c = content[++stri]
 #define lexer_read_ahead() content[stri + 1]
+#define newt(type, string) (tokens[i++] = (Token){type, string}) //new token
 
 
 Token* lexer_collect_tokens(char const *content)
@@ -57,43 +58,43 @@ Token* lexer_collect_tokens(char const *content)
 		{
 			case ' ':  break;
 			case '\n': break;
-			case ';': tokens[i++] = (Token){TK_SCLN, ";"}; break;
-			case '(': tokens[i++] = (Token){TK_OP, "("}; break;
-			case ')': tokens[i++] = (Token){TK_CP, ")"}; break;
-			case '{': tokens[i++] = (Token){TK_OB, "{"}; break;
-			case '}': tokens[i++] = (Token){TK_CB, "}"}; break;
-			case '[': tokens[i++] = (Token){TK_OSB, "["}; break;
-			case ']': tokens[i++] = (Token){TK_CSB, "]"}; break;
-			case ',': tokens[i++] = (Token){TK_COMMA, ","}; break;
-			case '+': tokens[i++] = (Token){TK_PLUS, "+"}; break;
-			case '*': tokens[i++] = (Token){TK_STAR, "*"}; break;
-			case '/': tokens[i++] = (Token){TK_DIV, "/"}; break;
-			case '!': tokens[i++] = (Token){TK_NOT, "!"}; break;
-			case '&': tokens[i++] = (Token){TK_AMPERCENT, "&"}; break;
-			case '@': tokens[i++] = (Token){TK_AT, "@"}; break;
-			case '.': tokens[i++] = (Token){TK_POINT, "."}; break;
-			case '<': tokens[i++] = (Token){TK_LESSTHAN, "<"}; break;
-			case '>': tokens[i++] = (Token){TK_MORETHAN, ">"}; break;
+			case ';': newt(TK_SCLN, ";"); break;
+			case '(': newt(TK_OP, "("); break;
+			case ')': newt(TK_CP, ")"); break;
+			case '{': newt(TK_OB, "{"); break;
+			case '}': newt(TK_CB, "}"); break;
+			case '[': newt(TK_OSB, "["); break;
+			case ']': newt(TK_CSB, "]"); break;
+			case ',': newt(TK_COMMA, ","); break;
+			case '+': newt(TK_PLUS, "+"); break;
+			case '*': newt(TK_STAR, "*"); break;
+			case '/': newt(TK_DIV, "/"); break;
+			case '!': newt(TK_NOT, "!"); break;
+			case '&': newt(TK_AMPERCENT, "&"); break;
+			case '@': newt(TK_AT, "@"); break;
+			case '.': newt(TK_POINT, "."); break;
+			case '<': newt(TK_LESSTHAN, "<"); break;
+			case '>': newt(TK_MORETHAN, ">"); break;
 			case '=': 
 				if (lexer_read_ahead() == '=')
 				{
-					tokens[i++] = (Token){TK_EQUALS, "=="}; 
+					newt(TK_EQUALS, "=="); 
 					lexer_advance();
 				}
 				else
 				{
-					tokens[i++] = (Token){TK_ASSIGN, "="}; 
+					newt(TK_ASSIGN, "="); 
 				}
 				break;
 			case '-': 
 				if (lexer_read_ahead() == '>')
 				{
-					tokens[i++] = (Token){TK_ARROW, "->"}; 
+					newt(TK_ARROW, "->"); 
 					lexer_advance();
 				}
 				else
 				{
-					tokens[i++] = (Token){TK_MINUS, "-"}; 
+					newt(TK_MINUS, "-"); 
 				}
 				break;
 			default:
@@ -102,7 +103,7 @@ Token* lexer_collect_tokens(char const *content)
 		}
 		lexer_advance(); 
 	}
-	tokens[i++] = (Token){TK_EOF, "EOF"};
+	newt(TK_EOF, "EOF");
 
 	for (U32 tk_i=0; tk_i < i; ++tk_i)
 	{
@@ -111,26 +112,16 @@ Token* lexer_collect_tokens(char const *content)
 			if (isupper(tokens[tk_i].content[0]))
 			{
 				tokens[tk_i].type = TK_TYPE;
+				continue;
 			}
-			else if (!strcmp(tokens[tk_i].content, "if"))
+			char *keywords[] = {"if", "while", "for", "ret", "struct"};
+			TokenType matches[] = {TK_IF, TK_WHILE, TK_FOR, TK_RET, TK_STRUCT};
+			for (unsigned int i=0; i < sizeof(matches) / sizeof(matches[0]); ++i)
 			{
-				tokens[tk_i].type = TK_IF;
-			}
-			else if (!strcmp(tokens[tk_i].content, "while"))
-			{
-				tokens[tk_i].type = TK_WHILE;
-			}
-			else if (!strcmp(tokens[tk_i].content, "for"))
-			{
-				tokens[tk_i].type = TK_FOR;
-			}
-			else if (!strcmp(tokens[tk_i].content, "ret"))
-			{
-				tokens[tk_i].type = TK_RET;
-			}
-			else if (!strcmp(tokens[tk_i].content, "struct"))
-			{
-				tokens[tk_i].type = TK_STRUCT;
+				if (!strcmp(keywords[i], tokens[tk_i].content))
+				{
+					tokens[tk_i].type = matches[i];
+				}
 			}
 		}
 	}
