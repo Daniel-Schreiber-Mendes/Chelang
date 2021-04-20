@@ -7,11 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "types.h"
-
-#define MAX_TOKENS 65535
-#define MAX_ID_SIZE 32
-#define MAX_INT_LITERAL_SIZE 16
-#define MAX_STRING_SIZE 64
+#include <checl/containers.h>
 
 
 typedef enum
@@ -55,6 +51,7 @@ typedef enum
 
 //control statements
 	TK_IF,
+	TK_ELSE,
 	TK_WHILE,
 	TK_FOR,
 	TK_RET,
@@ -76,7 +73,7 @@ typedef struct
 Token;
 
 
-Token* lexer_collect_tokens(char const *content);
+Vector lexer_collect_tokens(char const *content);
 
 
 #endif

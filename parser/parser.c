@@ -46,9 +46,9 @@ void unit(Ast *ast)
 }
 
 
-Ast parse_tokens(Token *token_array)
+Ast parse_tokens(Vector token_array)
 {
-	tokens = token_array;
+	tokens = token_array.data;
 	token = tokens[0];
 
 	Ast ast;

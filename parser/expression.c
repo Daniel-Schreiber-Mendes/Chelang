@@ -35,6 +35,7 @@ bool accept_binary()
 	if (accept(TK_POINT)) return 1;
 	if (accept(TK_LESSTHAN)) return 1;
 	if (accept(TK_MORETHAN)) return 1;
+	if (accept(TK_EQUALS)) return 1;
 	return 0;
 }
 

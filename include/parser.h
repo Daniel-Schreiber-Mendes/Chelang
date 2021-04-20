@@ -12,7 +12,9 @@ typedef enum
 	C_FUNC_DEF,
 	C_FUNC_CALL,
 	C_SCOPE,
+	C_SCOPE_END,
 	C_IF,
+	C_ELSE,
 	C_WHILE,
 	C_RET,
 	C_ARR_INDX,
@@ -33,8 +35,11 @@ AstType;
 
 typedef struct
 {
-	unsigned int size;
-	char *name;
+	union 
+	{
+		char *name;
+		unsigned int id;
+	};
 	char *type;
 }
 Symbol;
@@ -47,13 +52,15 @@ typedef struct
 	{
 		int value;
 		unsigned int var_id;
+		unsigned int label_id;
 	};
-	char *type; //type of the operand, can be null if it is not known
+	char *type; //type of the operand, can be null if it is not known or not a variable
 	enum //OperandType
 	{
 		OT_NO_OP,
 		OT_NUM,
-		OT_VAR	
+		OT_VAR,
+		OT_LABEL
 	} 
 	ot;
 }
@@ -65,15 +72,18 @@ struct Ast
 	AstType type;
 	union
 	{
-		ConstructType ctype;
+		struct 
+		{
+			ConstructType ctype;
+			Operand o; //temporary that can be assigned to a construct
+			Vector symbols; //symbol table
+			struct Ast **childs;
+			unsigned char child_count, child_cap;
+		};
 		TokenType ttype;
 	};
-	char *name;
 	struct Ast *parent;
-	struct Ast *childs[16];
-	U8 child_count;
-	Vector symbols; //symbol table
-	Operand o; //temporary
+	char *name;
 };
 
 typedef struct Ast Ast;
@@ -98,10 +108,8 @@ void var_fnc_type_def(Ast *ast);
 void ast_create(Ast *ast);
 Ast* ast_add_child(Ast *parent, ConstructType t, char const* name);
 void ast_add_token(Ast *parent, Token t);
-Ast* ast_get_penultimate(Ast* ast);
 bool ast_sort(Ast *ast);
 void ast_print(Ast *ast, U8 padding, char const* head);
-Ast* ast_get_left_sibling(Ast *ast);
 unsigned int ast_get_index(Ast *ast);
 void ast_insert_child(Ast *parent, Ast *child, unsigned int i);
 void ast_move(Ast *dest, unsigned int dest_i, Ast *ast, unsigned int i);
@@ -112,7 +120,7 @@ bool expect(TokenType t);
 bool check(TokenType t);
 Token get_token(I8 d);
 void unit(Ast *ast);
-Ast parse_tokens(Token *token_array);
+Ast parse_tokens(Vector token_array);
 
 void create_symbol_tables(Ast *ast, Ast *last_scope);
 

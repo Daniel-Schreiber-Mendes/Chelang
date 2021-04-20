@@ -18,6 +18,11 @@ void statement(Ast *ast)
     {
 
     }
+    else if (accept(TK_ELSE))
+    {
+        ast = ast_add_child(ast, C_ELSE, "C_ELSE");
+        statement(ast);
+    }
     else if (accept(TK_IF))
     {
         expect(TK_OP);
