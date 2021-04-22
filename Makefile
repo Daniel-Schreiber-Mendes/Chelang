@@ -9,4 +9,4 @@ make: $(c_obj_files)
 	./ccc
 
 %.o : %.c
-	gcc -c -g '$^' -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -lcheio -Iinclude
+	gcc -c -g '$^' -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -Wno-sign-compare -lcheio -Iinclude

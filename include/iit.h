@@ -42,6 +42,13 @@ I_ret;
 
 typedef struct
 {
+	Operand o0; 
+}
+I_ret_val;
+
+
+typedef struct
+{
 	Operand o0; //condition variable
 	Operand o1; //label
 }
@@ -63,6 +70,7 @@ typedef struct
 		I_ASSIGN2,
 		I_FUNC_CALL,
 		I_RET,
+		I_RET_VAL,
 		I_JUMP,
 		I_FUNC_DEF
 	} type;
@@ -72,6 +80,7 @@ typedef struct
 		I_assign2 assign2;
 		I_func_call func_call;
 		I_ret ret;
+		I_ret_val ret_val;
 		I_jump jump;
 		I_func_def func_def;
 	};
@@ -87,10 +96,6 @@ typedef struct
 Iit;
 
 
-#define NO_OPERAND ((Operand){{0}, 0, 0})
-#define LOCAL_LABEL NULL
-
-
 Iit create_iit(Ast *ast);
 void create_ii(Ast *ast, Ast *last_scope);
 
@@ -98,7 +103,8 @@ void create_ii(Ast *ast, Ast *last_scope);
 void create_i_assign1(Operand o0, Operand o1);
 void create_i_assign2(Operand o0, Operand o1, char *r_operator, Operand o2);
 void create_i_func_call(Operand o0);
-void create_i_ret(Operand o0);
+void create_i_ret();
+void create_i_ret_val(Operand o0);
 void create_i_jump(Operand cond, Operand label);
 void create_i_func_def(Operand o0);
 

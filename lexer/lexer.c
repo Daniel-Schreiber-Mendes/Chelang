@@ -16,7 +16,11 @@
 	newt(token, str);
 
 
-#define lexer_advance() c = content[++stri]
+#define lexer_advance()\
+	({\
+		assert(stri < strsize);\
+		c = content[++stri];\
+	})
 #define lexer_read_ahead() content[stri + 1]
 #define newt(type, string) (vector_push_back(&tokens, Token, ((Token){type, string}))) //new token
 
@@ -24,6 +28,7 @@
 Vector lexer_collect_tokens(char const *content)
 {
 	U16 stri = 0; //index into string
+	unsigned int strsize = strlen(content);
 	Vector tokens;
 	vector_construct(&tokens, sizeof(Token));
 

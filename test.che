@@ -3,7 +3,7 @@
 I fact()
 {
 	Int hallo = 5;
-	Int i = 5;
+	Int i = (6 + 3);
 	if (hallo == i)
 	{
 		ret 1 + i;

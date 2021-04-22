@@ -41,12 +41,7 @@ typedef struct
 {
 	enum //OperandType
 	{
-		OT_NO_OP,
-		OT_NUM,
-		OT_VARIABLE,
-		OT_LABEL,
-		OT_FUNCTION,
-		OT_TEMPORARY
+		OT_NO_OP
 	} 
 	ot;
 	union 
@@ -55,6 +50,7 @@ typedef struct
 		unsigned int value;
 	};
 	struct Ast *scope;
+	bool is_num;
 }
 Operand;
 

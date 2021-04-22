@@ -4,24 +4,25 @@ static Iit iit;
 
 void print_operand(Operand *o)
 {
-	if (o->ot == OT_FUNCTION)
+	if (o->ot == OT_NO_OP) 
+		return;
+	if (o->is_num)
 	{
-		printf("	%s:", vector_at(&o->scope->symbols, Symbol, o->symbol_id).function.name);
-	}
-	else if (o->ot == OT_TEMPORARY)
-	{
-		printf("t%u", vector_at(&o->scope->symbols, Symbol, o->symbol_id).temporary.id);
-	}
-	else if (o->ot == OT_VARIABLE)
-	{
-		printf("%s", vector_at(&o->scope->symbols, Symbol, o->symbol_id).variable.name);
-	}
-	else if (o->ot == OT_LABEL)
-	{
-		printf("l%u", vector_at(&o->scope->symbols, Symbol, o->symbol_id).label.id);
-	}
-	else
 		printf("%i ", o->value);
+		return;
+	}
+	Symbol s = vector_at(&o->scope->symbols, Symbol, o->symbol_id);
+	switch (s.symboltype)
+	{
+		case ST_FUNCTION: 
+			printf("	%s:", s.function.name); break;
+		case ST_VARIABLE:
+			printf("%s", s.variable.name); break;
+		case ST_TEMPORARY:
+			printf("t%u", s.temporary.id); break;
+		case ST_LABEL:
+			printf("l%u", s.label.id); break;
+	}
 }
 
 
@@ -50,8 +51,10 @@ Iit create_iit(Ast *ast)
 				break;
 			case I_RET:
 				printf("ret ");
-				if (iit.instructions[i].ret.o0.ot != OT_NO_OP)
-					print_operand(&iit.instructions[i].ret.o0);
+				break;
+			case I_RET_VAL:
+				printf("ret ");
+				print_operand(&iit.instructions[i].ret_val.o0);
 				break;
 			case I_JUMP:
 				printf("jump ");
@@ -125,9 +128,9 @@ void create_ii(Ast *ast, Ast *last_scope)
 				break;
 			case C_RET:
 				if (ast->child_count > 0)
-					create_i_ret(get_last_operand());
+					create_i_ret_val(get_last_operand());
 				else 
-					create_i_ret(NO_OPERAND);
+					create_i_ret();
 				break;
 			default:
 				break;
@@ -162,9 +165,15 @@ void create_i_func_call(Operand o0)
 }
 
 
-void create_i_ret(Operand o0)
+void create_i_ret()
 {
-	iit.instructions[iit.size++] = (Instruction){I_RET, .ret = (I_ret){o0}};
+	iit.instructions[iit.size++].type = I_RET;
+}
+
+
+void create_i_ret_val(Operand o0)
+{
+	iit.instructions[iit.size++] = (Instruction){I_RET_VAL, .ret_val = (I_ret_val){o0}};
 }
 
 
@@ -182,11 +191,14 @@ void create_i_func_def(Operand o0)
 
 Operand create_operand(Ast *ast, Ast *last_scope)
 {
+	assert(ast && last_scope);
 	Operand o;
+	o.ot = 10;
 	if (ast->type == AT_CONSTRUCT)
 	{
 		if (ast->ctype == C_BIN_OP)
 		{
+			printf("YEYE\n");
 			o = ast->o;
 		}
 	}
@@ -195,12 +207,12 @@ Operand create_operand(Ast *ast, Ast *last_scope)
 		if (ast->ttype == TK_INT_LIT)
 		{
 			o.value = atoi(ast->name);
-			o.ot = OT_NUM;	
+			o.is_num = 1;
 		}
 		else if (ast->ttype == TK_ID)
 		{
-			o.ot = OT_VARIABLE;
 			o.scope = last_scope;
+			o.is_num = 0;
 			vector_vforeach(&last_scope->symbols, Symbol, s)
 			{
 				if (s.symboltype == ST_VARIABLE)
@@ -227,7 +239,7 @@ Operand create_temporary(Ast *ast, Ast *last_scope)
 {
 	unsigned int symbol_id = last_scope->symbols.size;
 	vector_push_back(&last_scope->symbols, Symbol, ((Symbol){ST_TEMPORARY, .temporary = (Temporary){symbol_id}}));
-	return (Operand){.ot = OT_TEMPORARY, .symbol_id = symbol_id, .scope = last_scope};
+	return (Operand){.ot = 10, .symbol_id = symbol_id, .scope = last_scope, .is_num = 0};
 }
 
 
@@ -235,7 +247,7 @@ Operand create_variable(Ast *ast, Ast *last_scope)
 {
 	unsigned int symbol_id = last_scope->symbols.size;
 	vector_push_back(&last_scope->symbols, Symbol, ((Symbol){ST_VARIABLE, .variable = (Variable){ast->name, NULL}}));
-	return (Operand){.ot = OT_VARIABLE, .symbol_id = symbol_id, .scope = last_scope};
+	return (Operand){.ot = 10, .symbol_id = symbol_id, .scope = last_scope, .is_num = 0};
 }
 
 
@@ -243,7 +255,7 @@ Operand create_label(Ast *last_scope)
 {
 	unsigned int symbol_id = last_scope->symbols.size;
 	vector_push_back(&last_scope->symbols, Symbol, ((Symbol){ST_LABEL, .label = (Label){symbol_id}}));
-	return (Operand){.ot = OT_LABEL, .symbol_id = symbol_id, .scope = last_scope};
+	return (Operand){.ot = 10, .symbol_id = symbol_id, .scope = last_scope, .is_num = 0};
 }
 
 
@@ -251,7 +263,7 @@ Operand create_function(Ast *ast, Ast *last_scope)
 {
 	unsigned int symbol_id = last_scope->symbols.size;
 	vector_push_back(&last_scope->symbols, Symbol, ((Symbol){ST_FUNCTION, .function = (Function){ast->name}}));
-	return (Operand){.ot = OT_FUNCTION, .symbol_id = symbol_id, .scope = last_scope};
+	return (Operand){.ot = 10, .symbol_id = symbol_id, .scope = last_scope, .is_num = 0};
 }
 
 
