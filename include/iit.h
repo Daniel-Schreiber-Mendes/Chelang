@@ -1,6 +1,7 @@
 #ifndef IIT
 #define IIT
-#include<parser.h>
+#include <parser.h>
+#include <symbol_table.h>
 
 
 //o0 = o1
@@ -91,7 +92,7 @@ Iit;
 
 
 Iit create_iit(Ast *ast);
-void create_ii(Ast *ast);
+void create_ii(Ast *ast, Ast *last_scope);
 
 
 void create_i_assign1(Operand o0, Operand o1);
@@ -99,13 +100,13 @@ void create_i_assign2(Operand o0, Operand o1, char *r_operator, Operand o2);
 void create_i_func_call(Operand o0);
 void create_i_ret(Operand o0);
 void create_i_jump(Operand cond, Operand label);
-void create_i_func_def(Operand label);
+void create_i_func_def(Operand o0);
 
-Operand create_operand(Ast *ast);
-Operand create_label(Ast *ast);
-unsigned int get_var_id(Ast *ast);
-unsigned int get_label_id(Ast *ast);
-Operand create_temporary(void);
+Operand create_operand(Ast *ast, Ast *last_scope);
+Operand create_label(Ast *last_scope);
+Operand create_temporary(Ast *ast, Ast *temporary);
+Operand create_variable(Ast *ast, Ast *last_scope);
+Operand create_function(Ast *ast, Ast *last_scope);
 Operand get_last_operand(void);
 
 #endif

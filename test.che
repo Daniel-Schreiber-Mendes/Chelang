@@ -2,12 +2,10 @@
 
 I fact()
 {
-	if (i == 0)
+	Int hallo = 5;
+	Int i = 5;
+	if (hallo == i)
 	{
-		ret 1;
+		ret 1 + i;
 	}
-	else if (i > 0)
-	{
-		ret i + 3; 
-	}	
 }

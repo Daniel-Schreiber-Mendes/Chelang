@@ -2,6 +2,7 @@
 #define PARSER_H
 #include <lexer.h>
 #include <checl/containers.h>
+#include <symbol_table.h>
 
 
 typedef enum
@@ -33,36 +34,27 @@ typedef enum
 AstType;
 
 
-typedef struct
-{
-	union 
-	{
-		char *name;
-		unsigned int id;
-	};
-	char *type;
-}
-Symbol;
-
+struct Ast;
 
 
 typedef struct
 {
-	union
-	{
-		int value;
-		unsigned int var_id;
-		unsigned int label_id;
-	};
-	char *type; //type of the operand, can be null if it is not known or not a variable
 	enum //OperandType
 	{
 		OT_NO_OP,
 		OT_NUM,
-		OT_VAR,
-		OT_LABEL
+		OT_VARIABLE,
+		OT_LABEL,
+		OT_FUNCTION,
+		OT_TEMPORARY
 	} 
 	ot;
+	union 
+	{
+		unsigned int symbol_id;
+		unsigned int value;
+	};
+	struct Ast *scope;
 }
 Operand;
 

@@ -111,14 +111,6 @@ void ast_print(Ast *ast, U8 padding, char const* head)
 		printf("|  ");
 	}	
 	printf("%s%s", head, ast->name);
-	if (ast->type == AT_CONSTRUCT && (ast->ctype == C_UNIT || ast->ctype == C_SCOPE || ast->ctype == C_FUNC_DEF))
-	{
-		printf(": ");
-		vector_vforeach(&ast->symbols, Symbol, symbol)
-		{
-			printf("(%s:%s) ", symbol.type, symbol.name);
-		}
-	}
 
 	printf("\n");
 	for (U8 i=0; i < ast->child_count; ++i)
