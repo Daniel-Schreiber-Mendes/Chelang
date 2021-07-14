@@ -1,8 +1,0 @@
-
-
-module ::= imports* function+
-function ::= type identifier '(' (type identifier)* ')' '{' statement '}'
-identifier ::= [a-zA-Z0-9_]*
-customtype ::= identifier
-type ::= void | int8 | int16 | int32 | int64 | customtype
-statement ::= ('{' statement '}') | 'return' | (type identifier)
